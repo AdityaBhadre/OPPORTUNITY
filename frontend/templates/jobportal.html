@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Filter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .filters {
+            width: 200px;
+            margin-right: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px black;
+        }
+
+        .filters h2 {
+            margin-top: 0;
+        }
+
+        .filter-item {
+            margin-bottom: 20px;
+        }
+
+        .filter-item label {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .filter-item input[type="text"] {
+            width: 100%;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            background-color: #4ca0af;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #4551a0;
+        }
+
+        .line {
+            border-top: 1px solid black;
+            margin: 20px 0;
+        }
+
+        .companies {
+            flex-grow: 1;
+        }
+
+        #company-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .company-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="filters">
+            <h2>Filters</h2>
+
+            <!-- CGPA Slider -->
+            <div class="filter-item">
+                <h3>CGPA</h3>
+                <input type="range" id="cgpa" min="6" max="10" step="0.1" value="0" oninput="updateCgpaValue()">
+                <output id="cgpaOutput">0</output>
+            </div>
+
+            <!-- Location -->
+            <div class="filter-item">
+                <h3>Location</h3>
+                <input type="text" id="location">
+            </div>
+
+            <!-- Company Type -->
+            <div class="filter-item">
+                <h3>Company Type</h3>
+                <select id="company-type">
+                    <option value="">Select Company Type</option>
+                    <option value="Service-Based">Service Based</option>
+                    <option value="Product-Based">Product Based</option>
+                    <option value="Telecommunication">Telecommunication</option>
+                    <option value="Semiproduct Based">Semiproduct Based</option>
+                </select>
+            </div>
+
+            <!-- Skill Set -->
+            <div class="filter-item">
+                <h3>Skills</h3>
+                <input type="checkbox" id="Java" name="skill" value="Java">
+                <label for="Java">Java</label><br>
+                <input type="checkbox" id="cpp" name="skill" value="cpp">
+                <label for="cpp">cpp</label><br>
+                <input type="checkbox" id="C" name="skill" value="C">
+                <label for="C">C</label><br>
+                <input type="checkbox" id="Sql" name="skill" value="Sql">
+                <label for="Sql">Sql</label><br>
+                <input type="checkbox" id="DBMS" name="skill" value="DBMS">
+                <label for="DBMS">DBMS</label><br>
+                <input type="checkbox" id="DataStructure" name="skill" value="Data Structure">
+                <label for="DataStructure">Data Structure</label><br>
+                <input type="checkbox" id="python" name="skill" value="python">
+                <label for="python">Python</label><br>
+                <input type="checkbox" id="WebDevelopment" name="skill" value="Web Development">
+                <label for="WebDevelopment">Web Development</label><br>
+                <input type="checkbox" id="JavaScript" name="skill" value="JavaScript">
+                <label for="JavaScript">JavaScript</label><br>
+                <input type="checkbox" id="HTML" name="skill" value="HTML">
+                <label for="HTML">HTML</label><br>
+            </div>
+
+            <!-- Salary Slider -->
+            <div class="filter-item">
+                <h3>Salary</h3>
+                <input type="range" id="salary" min="100000" max="3500000" step="5000" value="0" oninput="updateSalaryValue()">
+                <output id="salaryOutput">0</output>
+            </div>
+
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+
+        <div class="companies">
+            <h2>List of Companies</h2>
+            <ul id="company-list">
+                <!-- List of companies will be displayed here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Update CGPA value in real time
+        function updateCgpaValue() {
+            var cgpa = document.getElementById('cgpa').value;
+            document.getElementById('cgpaOutput').textContent = cgpa;
+        }
+
+        // Update Salary value in real time
+        function updateSalaryValue() {
+            var salary = document.getElementById('salary').value;
+            document.getElementById('salaryOutput').textContent = salary;
+        }
+
+        // Function to apply filters and fetch companies
+        function applyFilters() {
+            var cgpa = document.getElementById('cgpa').value;
+            var location = document.getElementById('location').value;
+            var companyType = document.getElementById('company-type').value;
+            var skills = document.querySelectorAll('input[name="skill"]');
+            var skillList = [];
+
+            skills.forEach((g) => {
+                if (g.checked) {
+                    skillList.push(g.value);
+                }
+            });
+
+            var salary = document.getElementById('salary').value;
+
+            var data = {
+                "cgpa": cgpa,
+                "location": location,
+                "salary": salary,
+                "company-type": companyType,
+                "skill": skillList
+            };
+
+            fetch('http://127.0.0.1:5000/filtered-companies', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then((res) => {
+                if (res.ok) return res.json();
+                throw new Error('Network response was not ok');
+            })
+            .then((data) => {
+                displayCompanies(data);  // Function to display the list of companies
+            })
+            .catch((error) => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+
+        // Display the filtered companies
+        function displayCompanies(companies) {
+            var companyList = document.getElementById('company-list');
+            companyList.innerHTML = ''; // Clear previous list
+
+            companies.forEach(function(company) {
+                var li = document.createElement('li');
+                li.classList.add('company-item');
+                li.textContent = `${company.name} - ${company.location} - ${company.company_type} - Skills: ${company.skill.join(', ')} - Salary: ${company.salary}`;
+                companyList.appendChild(li);
+            });
+        }
+
+        // Initialize CGPA and Salary sliders to show their values on page load
+        window.onload = function() {
+            updateCgpaValue();
+            updateSalaryValue();
+        };
+    </script>
+</body>
+</html>
